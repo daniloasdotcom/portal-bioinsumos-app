@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:portal_bioinsumos_app/stats_service.dart';
 
 void main() {
   runApp(const PortalBioinsumosApp());
@@ -236,22 +237,49 @@ class _StatsMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        _StatCardMobile(
-          value: "811",
-          title: "Biodefensivos e Controle",
-          icon: Icons.bug_report_outlined,
-          color: Colors.orange,
-        ),
-        SizedBox(height: 12),
-        _StatCardMobile(
-          value: "2.224",
-          title: "Bioestimulantes e Inoculantes",
-          icon: Icons.spa_outlined,
-          color: Colors.green,
-        ),
-      ],
+    // Instanciamos o serviço
+    final statsService = StatsService();
+
+    return FutureBuilder<Map<String, int>>(
+      future: statsService.loadStats(), // Chama a função que lê os JSONs
+      builder: (context, snapshot) {
+        
+        // 1. Estado de Carregamento
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        // 2. Estado de Erro
+        if (snapshot.hasError) {
+          return const Center(child: Text("Erro ao carregar dados"));
+        }
+
+        // 3. Estado de Sucesso (Dados prontos)
+        final data = snapshot.data ?? {'totalBioinsumos': 0, 'totalInoculantes': 0};
+
+        return Column(
+          children: [
+            _StatCardMobile(
+              value: data['totalBioinsumos'].toString(), // Usa o dado real
+              title: "Biodefensivos e Controle",
+              icon: Icons.bug_report_outlined,
+              color: Colors.orange,
+            ),
+            const SizedBox(height: 12),
+            _StatCardMobile(
+              value: data['totalInoculantes'].toString(), // Usa o dado real
+              title: "Bioestimulantes e Inoculantes",
+              icon: Icons.spa_outlined,
+              color: Colors.green,
+            ),
+          ],
+        );
+      },
     );
   }
 }
