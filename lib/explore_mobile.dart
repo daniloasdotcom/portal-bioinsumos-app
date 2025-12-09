@@ -63,7 +63,6 @@ class _ExploreCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const _ExploreCard({
-    super.key,
     required this.title,
     required this.description,
     required this.action,

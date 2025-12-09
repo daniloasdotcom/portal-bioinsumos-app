@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:portal_bioinsumos_app/home.dart';
-import 'package:portal_bioinsumos_app/stats_service.dart';
 
 void main() {
   runApp(const PortalBioinsumosApp());

@@ -99,7 +99,6 @@ class _CatalogoCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const _CatalogoCard({
-    super.key,
     required this.title,
     required this.description,
     required this.buttonLabel,
