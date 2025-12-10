@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:portal_bioinsumos_app/busca_guiada.dart';
 
 class CatalogosPage extends StatelessWidget {
   const CatalogosPage({super.key});
@@ -6,9 +7,7 @@ class CatalogosPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Catálogo de Insumos"),
-      ),
+      appBar: AppBar(title: const Text("Catálogo de Insumos")),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(16),
@@ -74,7 +73,12 @@ class CatalogosPage extends StatelessWidget {
               buttonColor: const Color(0xFF7C3AED),
               icon: Icons.psychology_alt_outlined,
               iconColor: Colors.purple,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const BioinsumosPage()),
+                );
+              },
             ),
 
             const SizedBox(height: 32),
@@ -120,7 +124,7 @@ class _CatalogoCard extends StatelessWidget {
             blurRadius: 8,
             color: Colors.black.withOpacity(0.04),
             offset: const Offset(0, 3),
-          )
+          ),
         ],
       ),
       child: Padding(
@@ -186,12 +190,9 @@ class _CatalogoCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: Text(
-                  buttonLabel,
-                  style: const TextStyle(fontSize: 15),
-                ),
+                child: Text(buttonLabel, style: const TextStyle(fontSize: 15)),
               ),
-            )
+            ),
           ],
         ),
       ),

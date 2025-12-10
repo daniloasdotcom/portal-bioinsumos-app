@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:portal_bioinsumos_app/catalogos_page.dart';
+import 'package:portal_bioinsumos_app/legislation_page.dart';
 
 class ExploreMobile extends StatelessWidget {
   const ExploreMobile({super.key});
@@ -35,20 +36,28 @@ class ExploreMobile extends StatelessWidget {
         ),
 
         const SizedBox(height: 14),
-        const _ExploreCard(
+        _ExploreCard(
           title: "Dashboards & Gráficos",
           description:
               "Visualize distribuição por categoria, ingredientes e espécies.",
           action: "Ver Dashboards",
           icon: Icons.pie_chart_outline,
+          onTap: () {
+          },
         ),
         const SizedBox(height: 14),
-        const _ExploreCard(
+        _ExploreCard(
           title: "Legislação",
           description:
               "Leis, decretos e normas atualizadas que regulamentam o setor.",
           action: "Consultar Normas",
           icon: Icons.article_outlined,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const LegislationPage()),
+            );
+          },
         ),
       ],
     );

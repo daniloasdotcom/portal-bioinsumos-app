@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:portal_bioinsumos_app/catalogos_page.dart';
 import 'package:portal_bioinsumos_app/hero_mobile.dart';
 import 'package:portal_bioinsumos_app/stats_mobile.dart';
 import 'package:portal_bioinsumos_app/explore_mobile.dart';
 import 'package:portal_bioinsumos_app/footer_mobile.dart';
 
+// Importe a página de legislação criada anteriormente
+// Certifique-se de que o arquivo legislation_page.dart está na pasta correta
+import 'package:portal_bioinsumos_app/legislation_page.dart'; 
 
 class HomePageMobile extends StatelessWidget {
   const HomePageMobile({super.key});
@@ -47,16 +51,65 @@ class HomePageMobile extends StatelessWidget {
                 ],
               ),
             ),
-            _buildDrawerItem(Icons.home, "Home", true),
-            _buildDrawerItem(Icons.list_alt, "Catálogo", false),
-            _buildDrawerItem(Icons.bar_chart, "Dashboards", false),
-            _buildDrawerItem(Icons.gavel, "Legislação", false),
+            // Item: HOME
+            _buildDrawerItem(
+              context: context,
+              icon: Icons.home,
+              title: "Home",
+              isSelected: true,
+              onTap: () {
+                // Já estamos na Home, então apenas fecha o drawer
+                Navigator.pop(context);
+              },
+            ),
+            // Item: CATÁLOGO
+            _buildDrawerItem(
+              context: context,
+              icon: Icons.list_alt,
+              title: "Catálogo",
+              isSelected: false,
+              onTap: () {
+                Navigator.pop(context); // Fecha o Drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CatalogosPage()),
+                );
+              },
+            ),
+            // Item: DASHBOARDS
+            _buildDrawerItem(
+              context: context,
+              icon: Icons.bar_chart,
+              title: "Dashboards",
+              isSelected: false,
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DashboardPagePlaceholder()),
+                );
+              },
+            ),
+            // Item: LEGISLAÇÃO
+            _buildDrawerItem(
+              context: context,
+              icon: Icons.gavel,
+              title: "Legislação",
+              isSelected: false,
+              onTap: () {
+                Navigator.pop(context); // Fecha o Drawer primeiro
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LegislationPage()),
+                );
+              },
+            ),
           ],
         ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        physics: const BouncingScrollPhysics(), // Scroll mais natural
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: const [
             HeroMobile(),
@@ -66,14 +119,21 @@ class HomePageMobile extends StatelessWidget {
             ExploreMobile(),
             SizedBox(height: 32),
             FooterMobile(),
-            SizedBox(height: 16), // Espaço extra para safe area
+            SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDrawerItem(IconData icon, String title, bool isSelected) {
+  // Atualizei o método para receber o 'context' e o 'onTap'
+  Widget _buildDrawerItem({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return ListTile(
       leading: Icon(
         icon,
@@ -87,7 +147,18 @@ class HomePageMobile extends StatelessWidget {
         ),
       ),
       selected: isSelected,
-      onTap: () {},
+      onTap: onTap, // Executa a função passada
+    );
+  }
+}
+
+class DashboardPagePlaceholder extends StatelessWidget {
+  const DashboardPagePlaceholder({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Dashboards")),
+      body: const Center(child: Text("Página de Dashboards em construção")),
     );
   }
 }
