@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:portal_bioinsumos_app/catalogos_page.dart';
 import 'package:portal_bioinsumos_app/hero_mobile.dart';
+import 'package:portal_bioinsumos_app/loading_page.dart';
 import 'package:portal_bioinsumos_app/stats_mobile.dart';
 import 'package:portal_bioinsumos_app/explore_mobile.dart';
 import 'package:portal_bioinsumos_app/footer_mobile.dart';
@@ -86,7 +87,7 @@ class HomePageMobile extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const DashboardPagePlaceholder()),
+                  MaterialPageRoute(builder: (context) => const BioInsumoLoader()),
                 );
               },
             ),
