@@ -19,7 +19,7 @@ class Bioinsumo {
   final String classificacaoToxicologica;
   final String classificacaoAmbiental;
   final List<Documento> documentos;
-  
+
   bool expandido;
 
   Bioinsumo({
@@ -36,14 +36,17 @@ class Bioinsumo {
     this.expandido = false,
   });
 
-  String get nomePrincipal => marcaComercial.isNotEmpty ? marcaComercial.first : 'Sem Nome';
+  String get nomePrincipal =>
+      marcaComercial.isNotEmpty ? marcaComercial.first : 'Sem Nome';
 
   String? get urlAgrofit {
     if (documentos.isEmpty) return null;
     try {
       final doc = documentos.firstWhere(
-        (d) => d.tipoDocumento.contains('Bula') || d.tipoDocumento.contains('Rótulo'),
-        orElse: () => documentos.first
+        (d) =>
+            d.tipoDocumento.contains('Bula') ||
+            d.tipoDocumento.contains('Rótulo'),
+        orElse: () => documentos.first,
       );
       return doc.url;
     } catch (e) {
@@ -53,9 +56,11 @@ class Bioinsumo {
 
   String get culturasFormatadas {
     final culturas = indicacaoUso.map((e) => e.cultura).toSet().toList();
+
     if (culturas.isEmpty) return "Geral";
     if (culturas.contains("Todas as culturas")) return "Todas as Culturas";
-    return culturas.take(3).join(", ") + (culturas.length > 3 ? "..." : "");
+
+    return culturas.join(", ");
   }
 
   String get alvosFormatados {
@@ -72,19 +77,30 @@ class Bioinsumo {
       numeroRegistro: json['numero_registro'] ?? '',
       marcaComercial: List<String>.from(json['marca_comercial'] ?? []),
       titularRegistro: json['titular_registro'] ?? '',
-      classeCategoria: List<String>.from(json['classe_categoria_agronomica'] ?? []),
-      produtoOrganico: json['produto_agricultura_organica'] == true || json['produto_biologico'] == true,
-      indicacaoUso: (json['indicacao_uso'] as List?)
-          ?.map((e) => IndicacaoUso.fromJson(e))
-          .toList() ?? [],
-      ingredientes: (json['ingrediente_ativo_detalhado'] as List?)
-          ?.map((e) => IngredienteDetalhado.fromJson(e))
-          .toList() ?? [],
-      classificacaoToxicologica: json['classificacao_toxicologica'] ?? 'Não inf.',
+      classeCategoria: List<String>.from(
+        json['classe_categoria_agronomica'] ?? [],
+      ),
+      produtoOrganico:
+          json['produto_agricultura_organica'] == true ||
+          json['produto_biologico'] == true,
+      indicacaoUso:
+          (json['indicacao_uso'] as List?)
+              ?.map((e) => IndicacaoUso.fromJson(e))
+              .toList() ??
+          [],
+      ingredientes:
+          (json['ingrediente_ativo_detalhado'] as List?)
+              ?.map((e) => IngredienteDetalhado.fromJson(e))
+              .toList() ??
+          [],
+      classificacaoToxicologica:
+          json['classificacao_toxicologica'] ?? 'Não inf.',
       classificacaoAmbiental: json['classificacao_ambiental'] ?? 'Não inf.',
-      documentos: (json['documento_cadastrado'] as List?)
-          ?.map((e) => Documento.fromJson(e))
-          .toList() ?? [],
+      documentos:
+          (json['documento_cadastrado'] as List?)
+              ?.map((e) => Documento.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 }
@@ -94,7 +110,11 @@ class IndicacaoUso {
   final String? nomeCientifico;
   final List<String> nomesComuns;
 
-  IndicacaoUso({required this.cultura, this.nomeCientifico, required this.nomesComuns});
+  IndicacaoUso({
+    required this.cultura,
+    this.nomeCientifico,
+    required this.nomesComuns,
+  });
 
   factory IndicacaoUso.fromJson(Map<String, dynamic> json) {
     List<String> comuns = [];
@@ -117,7 +137,11 @@ class IngredienteDetalhado {
   final String concentracao;
   final String unidade;
 
-  IngredienteDetalhado({required this.nome, required this.concentracao, required this.unidade});
+  IngredienteDetalhado({
+    required this.nome,
+    required this.concentracao,
+    required this.unidade,
+  });
 
   factory IngredienteDetalhado.fromJson(Map<String, dynamic> json) {
     return IngredienteDetalhado(
@@ -173,7 +197,7 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
   bool isLoading = true;
   int passoAtual = 1;
   String textoBusca = "";
-  
+
   // Seleções
   String culturaSelecionada = "";
   String pragaSelecionada = "";
@@ -194,7 +218,7 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
   void initState() {
     super.initState();
     carregarDadosJson();
-    
+
     // NOVO: Listener para mostrar/ocultar botão de topo
     _scrollController.addListener(() {
       if (_scrollController.offset > 300 && !_showBackToTop) {
@@ -213,7 +237,9 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
 
   Future<void> carregarDadosJson() async {
     try {
-      final String response = await rootBundle.loadString('assets/todos_bioinsumos.json');
+      final String response = await rootBundle.loadString(
+        'assets/todos_bioinsumos.json',
+      );
       final List<dynamic> data = json.decode(response);
       setState(() {
         todosProdutos = data.map((json) => Bioinsumo.fromJson(json)).toList();
@@ -230,7 +256,8 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
     final Set<String> temp = {};
     for (var p in todosProdutos) {
       for (var uso in p.indicacaoUso) {
-        if (uso.cultura.toLowerCase() != 'todas as culturas' && uso.cultura.isNotEmpty) {
+        if (uso.cultura.toLowerCase() != 'todas as culturas' &&
+            uso.cultura.isNotEmpty) {
           temp.add(uso.cultura);
         }
       }
@@ -265,14 +292,20 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
         if (ehEsp || ehGer) {
           for (var nomePraga in uso.nomesComuns) {
             final cientifico = uso.nomeCientifico ?? '';
-            if (ehEsp) mapEsp[nomePraga] = cientifico;
-            else mapGer[nomePraga] = cientifico;
+            if (ehEsp)
+              mapEsp[nomePraga] = cientifico;
+            else
+              mapGer[nomePraga] = cientifico;
           }
         }
       }
     }
-    pragasEspecificas = mapEsp.entries.map((e) => PragaDisplay(e.key, e.value)).toList()..sort((a,b) => a.nome.compareTo(b.nome));
-    pragasGerais = mapGer.entries.map((e) => PragaDisplay(e.key, e.value)).toList()..sort((a,b) => a.nome.compareTo(b.nome));
+    pragasEspecificas =
+        mapEsp.entries.map((e) => PragaDisplay(e.key, e.value)).toList()
+          ..sort((a, b) => a.nome.compareTo(b.nome));
+    pragasGerais =
+        mapGer.entries.map((e) => PragaDisplay(e.key, e.value)).toList()
+          ..sort((a, b) => a.nome.compareTo(b.nome));
   }
 
   void _escolherPraga(String praga) {
@@ -300,8 +333,10 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
           if (c == 'todas as culturas') ehGeral = true;
         }
       }
-      if (ehEspecifico) produtosResultadosEspecificos.add(p);
-      else if (ehGeral) produtosResultadosGerais.add(p);
+      if (ehEspecifico)
+        produtosResultadosEspecificos.add(p);
+      else if (ehGeral)
+        produtosResultadosGerais.add(p);
     }
   }
 
@@ -357,29 +392,34 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
           backgroundColor: Colors.grey[50],
           // AppBar sem cor de fundo explícita (usa default/surface)
           appBar: AppBar(
-            title: const Text("Assistente de Bioinsumos", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            title: const Text(
+              "Assistente de Bioinsumos",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
             centerTitle: true,
             foregroundColor: colTexto,
-            
-            scrolledUnderElevation: 0, 
+
+            scrolledUnderElevation: 0,
             elevation: 0,
-            shape: Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1)),
-            
+            shape: Border(
+              bottom: BorderSide(color: Colors.grey.shade300, width: 1),
+            ),
+
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: _navegarVoltar,
             ),
           ),
-          
+
           // NOVO: Botão Flutuante Condicional
-          floatingActionButton: _showBackToTop 
-            ? FloatingActionButton(
-                onPressed: _rolarParaTopo,
-                backgroundColor: colRoxo,
-                mini: true, // Tamanho menor e mais discreto
-                child: const Icon(Icons.arrow_upward, color: Colors.white),
-              ) 
-            : null,
+          floatingActionButton: _showBackToTop
+              ? FloatingActionButton(
+                  onPressed: _rolarParaTopo,
+                  backgroundColor: colRoxo,
+                  mini: true, // Tamanho menor e mais discreto
+                  child: const Icon(Icons.arrow_upward, color: Colors.white),
+                )
+              : null,
 
           body: isLoading
               ? Center(child: CircularProgressIndicator(color: colRoxo))
@@ -388,14 +428,17 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
                     _buildStepper(),
                     Expanded(
                       child: ListView(
-                        controller: _scrollController, // NOVO: Attach Controller
+                        controller:
+                            _scrollController, // NOVO: Attach Controller
                         padding: const EdgeInsets.all(16),
                         physics: const AlwaysScrollableScrollPhysics(),
                         children: [
                           if (passoAtual == 1) _buildPasso1Cultura(),
                           if (passoAtual == 2) _buildPasso2Praga(),
                           if (passoAtual == 3) _buildPasso3Resultados(),
-                          const SizedBox(height: 60), // Espaço extra para o FAB não cobrir conteúdo
+                          const SizedBox(
+                            height: 60,
+                          ), // Espaço extra para o FAB não cobrir conteúdo
                         ],
                       ),
                     ),
@@ -414,12 +457,15 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
         child: TextButton.icon(
           onPressed: _navegarVoltar,
           icon: Icon(Icons.arrow_back, size: 16, color: colCinza),
-          label: Text("Voltar", style: TextStyle(color: colCinza, fontWeight: FontWeight.w600)),
+          label: Text(
+            "Voltar",
+            style: TextStyle(color: colCinza, fontWeight: FontWeight.w600),
+          ),
           style: TextButton.styleFrom(
             padding: EdgeInsets.zero,
             minimumSize: const Size(50, 30),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            alignment: Alignment.centerLeft
+            alignment: Alignment.centerLeft,
           ),
         ),
       ),
@@ -448,27 +494,41 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
   Widget _buildStepItem(int step, String label) {
     bool isActive = passoAtual >= step;
     bool isCompleted = passoAtual > step;
-    Color bg = isActive ? (isCompleted ? colVerde : colRoxo) : Colors.grey[200]!;
+    Color bg = isActive
+        ? (isCompleted ? colVerde : colRoxo)
+        : Colors.grey[200]!;
     Color txt = isActive ? Colors.white : Colors.grey[600]!;
 
     return Column(
       children: [
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          width: 35, height: 35,
+          width: 35,
+          height: 35,
           decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
           alignment: Alignment.center,
-          child: Text("$step", style: TextStyle(color: txt, fontWeight: FontWeight.bold)),
+          child: Text(
+            "$step",
+            style: TextStyle(color: txt, fontWeight: FontWeight.bold),
+          ),
         ),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isActive ? (isCompleted ? colVerde : colRoxo) : Colors.grey)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: isActive ? (isCompleted ? colVerde : colRoxo) : Colors.grey,
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildStepLine(int stepAfter) {
     return Container(
-      width: 40, height: 3,
+      width: 40,
+      height: 3,
       margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
       color: passoAtual > stepAfter ? colVerde : Colors.grey[200],
     );
@@ -476,47 +536,86 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
 
   // --- PASSO 1 ---
   Widget _buildPasso1Cultura() {
-    final filtradas = culturasDisponiveis.where((c) => c.toLowerCase().contains(textoBusca.toLowerCase())).toList();
+    final filtradas = culturasDisponiveis
+        .where((c) => c.toLowerCase().contains(textoBusca.toLowerCase()))
+        .toList();
     final double screenWidth = MediaQuery.of(context).size.width;
     final double cardWidth = (screenWidth - 32 - 15) / 2;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text("O que você vai cultivar?", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: colTexto), textAlign: TextAlign.center),
+        Text(
+          "O que você vai cultivar?",
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: colTexto,
+          ),
+          textAlign: TextAlign.center,
+        ),
         const SizedBox(height: 20),
         _buildSearchInput("Ex: Soja, Milho, Tomate..."),
         const SizedBox(height: 20),
-        
-        if (filtradas.isEmpty) 
-          const Padding(padding: EdgeInsets.all(20), child: Text("Nenhuma cultura encontrada.", textAlign: TextAlign.center)),
-          
-        Wrap(
-          spacing: 15, runSpacing: 15,
-          children: filtradas.map((c) => InkWell(
-            onTap: () => _escolherCultura(c),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: cardWidth, height: 120,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0,2))]
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(FontAwesomeIcons.seedling, size: 30, color: colVerde),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(c, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w600, color: colTexto)),
-                  ),
-                ],
-              ),
+
+        if (filtradas.isEmpty)
+          const Padding(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              "Nenhuma cultura encontrada.",
+              textAlign: TextAlign.center,
             ),
-          )).toList(),
+          ),
+
+        Wrap(
+          spacing: 15,
+          runSpacing: 15,
+          children: filtradas
+              .map(
+                (c) => InkWell(
+                  onTap: () => _escolherCultura(c),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: cardWidth,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          FontAwesomeIcons.seedling,
+                          size: 30,
+                          color: colVerde,
+                        ),
+                        const SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            c,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: colTexto,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
         ),
       ],
     );
@@ -524,9 +623,13 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
 
   // --- PASSO 2 ---
   Widget _buildPasso2Praga() {
-    final espFilt = pragasEspecificas.where((p) => p.nome.toLowerCase().contains(textoBusca.toLowerCase())).toList();
-    final gerFilt = pragasGerais.where((p) => p.nome.toLowerCase().contains(textoBusca.toLowerCase())).toList();
-    
+    final espFilt = pragasEspecificas
+        .where((p) => p.nome.toLowerCase().contains(textoBusca.toLowerCase()))
+        .toList();
+    final gerFilt = pragasGerais
+        .where((p) => p.nome.toLowerCase().contains(textoBusca.toLowerCase()))
+        .toList();
+
     if (textoBusca.isNotEmpty) {
       showEspecificos = true;
       showGerais = true;
@@ -536,7 +639,15 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildBotaoVoltarInternal(),
-        Text("Qual é o alvo ou problema?", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: colTexto), textAlign: TextAlign.center),
+        Text(
+          "Qual é o alvo ou problema?",
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: colTexto,
+          ),
+          textAlign: TextAlign.center,
+        ),
         const SizedBox(height: 20),
         _buildSearchInput("Filtrar praga..."),
         const SizedBox(height: 20),
@@ -548,10 +659,11 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
             icon: FontAwesomeIcons.bullseye,
             cor: colRoxo,
             isOpen: showEspecificos,
-            onTapHeader: () => setState(() => showEspecificos = !showEspecificos),
-            listaPragas: espFilt
+            onTapHeader: () =>
+                setState(() => showEspecificos = !showEspecificos),
+            listaPragas: espFilt,
           ),
-          
+
         if (espFilt.isNotEmpty) const SizedBox(height: 15),
 
         if (gerFilt.isNotEmpty)
@@ -562,41 +674,62 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
             cor: colVerde,
             isOpen: showGerais,
             onTapHeader: () => setState(() => showGerais = !showGerais),
-            listaPragas: gerFilt
+            listaPragas: gerFilt,
           ),
       ],
     );
   }
 
   Widget _buildAccordion({
-    required String titulo, required String subtitulo, required IconData icon,
-    required Color cor, required bool isOpen, required VoidCallback onTapHeader,
-    required List<PragaDisplay> listaPragas
+    required String titulo,
+    required String subtitulo,
+    required IconData icon,
+    required Color cor,
+    required bool isOpen,
+    required VoidCallback onTapHeader,
+    required List<PragaDisplay> listaPragas,
   }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isOpen ? Colors.grey.shade300 : Colors.transparent),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: const Offset(0,2))]
+        border: Border.all(
+          color: isOpen ? Colors.grey.shade300 : Colors.transparent,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
           InkWell(
             onTap: onTapHeader,
-            borderRadius: BorderRadius.vertical(top: const Radius.circular(12), bottom: Radius.circular(isOpen ? 0 : 12)),
+            borderRadius: BorderRadius.vertical(
+              top: const Radius.circular(12),
+              bottom: Radius.circular(isOpen ? 0 : 12),
+            ),
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 border: Border(left: BorderSide(color: cor, width: 5)),
-                borderRadius: BorderRadius.vertical(top: const Radius.circular(12), bottom: Radius.circular(isOpen ? 0 : 12)),
-                color: Colors.white
+                borderRadius: BorderRadius.vertical(
+                  top: const Radius.circular(12),
+                  bottom: Radius.circular(isOpen ? 0 : 12),
+                ),
+                color: Colors.white,
               ),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: cor.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                    decoration: BoxDecoration(
+                      color: cor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     child: Icon(icon, color: cor),
                   ),
                   const SizedBox(width: 15),
@@ -604,12 +737,27 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(titulo, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: colTexto)),
-                        Text(subtitulo, style: TextStyle(fontSize: 12, color: colCinza)),
+                        Text(
+                          titulo,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: colTexto,
+                          ),
+                        ),
+                        Text(
+                          subtitulo,
+                          style: TextStyle(fontSize: 12, color: colCinza),
+                        ),
                       ],
                     ),
                   ),
-                  Icon(isOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: colCinza)
+                  Icon(
+                    isOpen
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: colCinza,
+                  ),
                 ],
               ),
             ),
@@ -620,40 +768,62 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(12))
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(12),
+                ),
               ),
               child: Wrap(
-                spacing: 10, runSpacing: 10,
-                children: listaPragas.map((p) => InkWell(
-                  onTap: () => _escolherPraga(p.nome),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: cor == colVerde ? Colors.grey[50] : Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade200)
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 10,
+                runSpacing: 10,
+                children: listaPragas
+                    .map(
+                      (p) => InkWell(
+                        onTap: () => _escolherPraga(p.nome),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: cor == colVerde
+                                ? Colors.grey[50]
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(p.nome, style: TextStyle(fontWeight: FontWeight.w600, color: colTexto)),
-                              if (p.cientifico.isNotEmpty)
-                                Text(p.cientifico, style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey, fontSize: 12)),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      p.nome,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: colTexto,
+                                      ),
+                                    ),
+                                    if (p.cientifico.isNotEmpty)
+                                      Text(
+                                        p.cientifico,
+                                        style: const TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                          color: Colors.grey,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              Icon(icon, color: cor.withOpacity(0.2), size: 24),
                             ],
                           ),
                         ),
-                        Icon(icon, color: cor.withOpacity(0.2), size: 24)
-                      ],
-                    ),
-                  ),
-                )).toList(),
+                      ),
+                    )
+                    .toList(),
               ),
-            )
+            ),
         ],
       ),
     );
@@ -661,7 +831,8 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
 
   // --- PASSO 3 ---
   Widget _buildPasso3Resultados() {
-    int total = produtosResultadosEspecificos.length + produtosResultadosGerais.length;
+    int total =
+        produtosResultadosEspecificos.length + produtosResultadosGerais.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -670,16 +841,23 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TextButton.icon(
-              onPressed: _navegarVoltar, 
+              onPressed: _navegarVoltar,
               icon: Icon(Icons.arrow_back, size: 16, color: colCinza),
               label: Text("Voltar", style: TextStyle(color: colCinza)),
             ),
-            TextButton(onPressed: _reiniciar, child: const Text("Nova Busca"))
+            TextButton(onPressed: _reiniciar, child: const Text("Nova Busca")),
           ],
         ),
-        
+
         const SizedBox(height: 10),
-        Text("$total Soluções Encontradas", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colTexto)),
+        Text(
+          "$total Soluções Encontradas",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: colTexto,
+          ),
+        ),
         const SizedBox(height: 15),
 
         SizedBox(
@@ -689,25 +867,38 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
             label: const Text("Copiar Relatório"),
             onPressed: _copiarRelatorio,
             style: OutlinedButton.styleFrom(
-              foregroundColor: colRoxo, 
+              foregroundColor: colRoxo,
               side: BorderSide(color: colRoxo),
-              padding: const EdgeInsets.symmetric(vertical: 12)
+              padding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),
         ),
         const SizedBox(height: 25),
 
         if (produtosResultadosEspecificos.isNotEmpty) ...[
-          _buildHeaderSecao("Específicos para $culturaSelecionada", produtosResultadosEspecificos.length, colRoxo, FontAwesomeIcons.bullseye),
+          _buildHeaderSecao(
+            "Específicos para $culturaSelecionada",
+            produtosResultadosEspecificos.length,
+            colRoxo,
+            FontAwesomeIcons.bullseye,
+          ),
           ...produtosResultadosEspecificos.map((p) => _buildCardProduto(p)),
           const Divider(height: 40),
         ],
 
         if (produtosResultadosGerais.isNotEmpty) ...[
-          _buildHeaderSecao("Multiculturas", produtosResultadosGerais.length, Colors.blueGrey, FontAwesomeIcons.earthAmericas),
+          _buildHeaderSecao(
+            "Multiculturas",
+            produtosResultadosGerais.length,
+            Colors.blueGrey,
+            FontAwesomeIcons.earthAmericas,
+          ),
           Padding(
             padding: const EdgeInsets.only(bottom: 15),
-            child: Text("Produtos registrados para este alvo em qualquer cultura.", style: TextStyle(color: colCinza, fontSize: 12)),
+            child: Text(
+              "Produtos registrados para este alvo em qualquer cultura.",
+              style: TextStyle(color: colCinza, fontSize: 12),
+            ),
           ),
           ...produtosResultadosGerais.map((p) => _buildCardProduto(p)),
         ],
@@ -717,12 +908,19 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
             child: Column(
               children: [
                 const SizedBox(height: 30),
-                const Icon(FontAwesomeIcons.magnifyingGlassMinus, size: 50, color: Colors.grey),
+                const Icon(
+                  FontAwesomeIcons.magnifyingGlassMinus,
+                  size: 50,
+                  color: Colors.grey,
+                ),
                 const SizedBox(height: 10),
-                const Text("Não encontramos produtos.", style: TextStyle(color: Colors.grey)),
+                const Text(
+                  "Não encontramos produtos.",
+                  style: TextStyle(color: Colors.grey),
+                ),
               ],
             ),
-          )
+          ),
       ],
     );
   }
@@ -734,16 +932,38 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: cor.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(
+              color: cor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
             child: Icon(icon, color: cor, size: 16),
           ),
           const SizedBox(width: 10),
-          Expanded(child: Text(titulo, style: TextStyle(fontWeight: FontWeight.bold, color: cor, fontSize: 16))),
+          Expanded(
+            child: Text(
+              titulo,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: cor,
+                fontSize: 16,
+              ),
+            ),
+          ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(10)),
-            child: Text("$count", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: colCinza)),
-          )
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              "$count",
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: colCinza,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -751,21 +971,30 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
 
   Widget _buildCardProduto(Bioinsumo p) {
     Color corBorda = p.expandido ? colRoxo : Colors.grey.shade300;
-    
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.only(bottom: 15),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0,2))],
-        border: Border(left: BorderSide(color: corBorda, width: 5))
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border(left: BorderSide(color: corBorda, width: 5)),
       ),
       child: Column(
         children: [
           InkWell(
             onTap: () => setState(() => p.expandido = !p.expandido),
-            borderRadius: BorderRadius.vertical(top: const Radius.circular(12), bottom: Radius.circular(p.expandido ? 0 : 12)),
+            borderRadius: BorderRadius.vertical(
+              top: const Radius.circular(12),
+              bottom: Radius.circular(p.expandido ? 0 : 12),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -778,34 +1007,83 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
                         Wrap(
                           spacing: 5,
                           children: [
-                            ...p.classeCategoria.take(2).map((c) => Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(color: colRoxoClaro, borderRadius: BorderRadius.circular(4)),
-                              child: Text(c.toUpperCase(), style: TextStyle(color: colRoxo, fontSize: 9, fontWeight: FontWeight.bold)),
-                            )),
+                            ...p.classeCategoria
+                                .take(2)
+                                .map(
+                                  (c) => Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colRoxoClaro,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      c.toUpperCase(),
+                                      style: TextStyle(
+                                        color: colRoxo,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                             if (p.produtoOrganico)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(color: const Color(0xFFD1E7DD), borderRadius: BorderRadius.circular(4)),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFD1E7DD),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
                                 child: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.eco, size: 10, color: Color(0xFF198754)),
+                                    Icon(
+                                      Icons.eco,
+                                      size: 10,
+                                      color: Color(0xFF198754),
+                                    ),
                                     SizedBox(width: 2),
-                                    Text("ORGÂNICO", style: TextStyle(color: Color(0xFF198754), fontSize: 9, fontWeight: FontWeight.bold)),
+                                    Text(
+                                      "ORGÂNICO",
+                                      style: TextStyle(
+                                        color: Color(0xFF198754),
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ],
                                 ),
-                              ), 
+                              ),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Text(p.nomePrincipal, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: colTexto)),
+                        Text(
+                          p.nomePrincipal,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: colTexto,
+                          ),
+                        ),
                         if (p.titularRegistro.isNotEmpty)
-                          Text(p.titularRegistro, style: TextStyle(color: colCinza, fontSize: 13)),
+                          Text(
+                            p.titularRegistro,
+                            style: TextStyle(color: colCinza, fontSize: 13),
+                          ),
                       ],
                     ),
                   ),
-                  Icon(p.expandido ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: p.expandido ? colRoxo : Colors.grey)
+                  Icon(
+                    p.expandido
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: p.expandido ? colRoxo : Colors.grey,
+                  ),
                 ],
               ),
             ),
@@ -817,47 +1095,84 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
               decoration: const BoxDecoration(
                 color: Colors.white,
                 border: Border(top: BorderSide(color: Color(0xFFF1F3F5))),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(12))
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(12),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildDetailBox("Indicações Principais", 
+                  _buildDetailBox(
+                    "Indicações Principais",
                     RichText(
                       text: TextSpan(
                         style: TextStyle(color: colTexto, fontSize: 14),
                         children: [
-                          const TextSpan(text: "Culturas: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                          const TextSpan(
+                            text: "Culturas: ",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           TextSpan(text: "${p.culturasFormatadas}\n"),
-                          const TextSpan(text: "Alvo Biológico: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                          const TextSpan(
+                            text: "Alvo Biológico: ",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           TextSpan(text: p.alvosFormatados),
-                        ]
+                        ],
                       ),
-                    )
+                    ),
                   ),
                   const SizedBox(height: 15),
                   if (p.ingredientes.isNotEmpty) ...[
-                    Text("INGREDIENTES ATIVOS", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey[500])),
+                    Text(
+                      "INGREDIENTES ATIVOS",
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[500],
+                      ),
+                    ),
                     const SizedBox(height: 5),
                     Wrap(
-                      spacing: 8, runSpacing: 8,
-                      children: p.ingredientes.map((ing) => Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(20)),
-                        child: Text("${ing.nome} (${ing.concentracao} ${ing.unidade})", style: TextStyle(fontSize: 12, color: colTexto)),
-                      )).toList(),
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: p.ingredientes
+                          .map(
+                            (ing) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                "${ing.nome} (${ing.concentracao} ${ing.unidade})",
+                                style: TextStyle(fontSize: 12, color: colTexto),
+                              ),
+                            ),
+                          )
+                          .toList(),
                     ),
                     const SizedBox(height: 15),
                   ],
-                  _buildDetailBox("Classificação", 
+                  _buildDetailBox(
+                    "Classificação",
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Toxicidade: ${p.classificacaoToxicologica}", style: const TextStyle(fontSize: 13)),
+                        Text(
+                          "Toxicidade: ${p.classificacaoToxicologica}",
+                          style: const TextStyle(fontSize: 13),
+                        ),
                         const SizedBox(height: 4),
-                        Text("Ambiental: ${p.classificacaoAmbiental}", style: const TextStyle(fontSize: 13)),
+                        Text(
+                          "Ambiental: ${p.classificacaoAmbiental}",
+                          style: const TextStyle(fontSize: 13),
+                        ),
                       ],
-                    )
+                    ),
                   ),
                   const SizedBox(height: 15),
                   if (p.urlAgrofit != null)
@@ -867,16 +1182,28 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF0d6efd),
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                         onPressed: () => _abrirUrl(p.urlAgrofit!),
-                        icon: const Icon(Icons.description, color: Colors.white, size: 18),
-                        label: const Text("Consultar Ficha / Bula no Agrofit", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        icon: const Icon(
+                          Icons.description,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                        label: const Text(
+                          "Consultar Ficha / Bula no Agrofit",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    )
+                    ),
                 ],
               ),
-            )
+            ),
         ],
       ),
     );
@@ -886,7 +1213,14 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey[500])),
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[500],
+          ),
+        ),
         const SizedBox(height: 5),
         Container(
           width: double.infinity,
@@ -894,10 +1228,10 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
           decoration: BoxDecoration(
             color: Colors.grey[50],
             border: Border.all(color: Colors.grey.shade200),
-            borderRadius: BorderRadius.circular(8)
+            borderRadius: BorderRadius.circular(8),
           ),
           child: content,
-        )
+        ),
       ],
     );
   }
@@ -911,17 +1245,30 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
         filled: true,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(vertical: 15),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: Colors.black87, width: 2)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide(color: colRoxo, width: 2)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: Colors.black87, width: 2)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: const BorderSide(color: Colors.black87, width: 2),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide(color: colRoxo, width: 2),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: const BorderSide(color: Colors.black87, width: 2),
+        ),
       ),
     );
   }
 
   Future<void> _abrirUrl(String url) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
-    else ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Não foi possível abrir o link.")));
+    if (await canLaunchUrl(uri))
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    else
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Não foi possível abrir o link.")),
+      );
   }
 
   void _copiarRelatorio() {
@@ -936,9 +1283,12 @@ class _BioinsumosPageState extends State<BioinsumosPage> {
         sb.writeln("- ${p.nomePrincipal} (${p.numeroRegistro})");
       }
     }
+
     addList("Específicos", produtosResultadosEspecificos);
     addList("Gerais", produtosResultadosGerais);
     Clipboard.setData(ClipboardData(text: sb.toString()));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Relatório copiado!")));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Relatório copiado!")));
   }
 }

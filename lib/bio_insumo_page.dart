@@ -62,8 +62,11 @@ class _BioInsumoPageState extends State<BioInsumoPage> {
     if (culturaSelecionada == null) return;
 
     // 1. Filtra dados pela cultura selecionada
-    final dadosCultura = widget.dados.where((item) =>
-        item.cultura.trim().toUpperCase() == culturaSelecionada).toList();
+    final dadosCultura = widget.dados
+        .where(
+          (item) => item.cultura.trim().toUpperCase() == culturaSelecionada,
+        )
+        .toList();
 
     if (dadosCultura.isEmpty) {
       setState(() => listaGraficos = []);
@@ -76,7 +79,7 @@ class _BioInsumoPageState extends State<BioInsumoPage> {
       final tipo = (item.tipo != null && item.tipo!.isNotEmpty)
           ? item.tipo!.trim()
           : 'OUTROS';
-      
+
       if (!mapaTipos.containsKey(tipo)) {
         mapaTipos[tipo] = [];
       }
@@ -124,7 +127,7 @@ class _BioInsumoPageState extends State<BioInsumoPage> {
 
     // Soma total do grupo
     final totalDesteTipo = sortedEntries.fold(0, (sum, e) => sum + e.value);
-    
+
     // Pega o valor máximo para calcular a % da barra (escala relativa)
     final maxValue = sortedEntries.isNotEmpty ? sortedEntries.first.value : 1;
 
@@ -132,7 +135,9 @@ class _BioInsumoPageState extends State<BioInsumoPage> {
       titulo: titulo,
       total: totalDesteTipo,
       cor: _getCorPorTipo(titulo),
-      dados: sortedEntries.map((e) => BarData(label: e.key, value: e.value)).toList(),
+      dados: sortedEntries
+          .map((e) => BarData(label: e.key, value: e.value))
+          .toList(),
       maxValue: maxValue,
     );
   }
@@ -149,7 +154,7 @@ class _BioInsumoPageState extends State<BioInsumoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100], 
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text("BioInsumos Mobile"),
         foregroundColor: Colors.black,
@@ -166,10 +171,10 @@ class _BioInsumoPageState extends State<BioInsumoPage> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08), 
-                    blurRadius: 12, 
-                    offset: const Offset(0, 4)
-                  )
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
               ),
               padding: const EdgeInsets.all(16),
@@ -180,28 +185,37 @@ class _BioInsumoPageState extends State<BioInsumoPage> {
                   const Text(
                     "Total de Bioestimulantes e Inoculantes por Cultura",
                     style: TextStyle(
-                      fontSize: 18, 
-                      fontWeight: FontWeight.bold, 
-                      color: Color(0xFF2C3E50)
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2C3E50),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Select (Dropdown)
                   DropdownButtonFormField<String>(
                     value: culturaSelecionada,
                     decoration: InputDecoration(
                       labelText: "Selecione a Cultura",
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
                     ),
-                    items: culturasDisponiveis.map((c) => 
-                      DropdownMenuItem(value: c, child: Text(c))
-                    ).toList(),
+                    items: culturasDisponiveis
+                        .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                        .toList(),
                     onChanged: _onCulturaChanged,
                   ),
 
-                  const Divider(height: 32, thickness: 1, color: Color(0xFFF0F0F0)),
+                  const Divider(
+                    height: 32,
+                    thickness: 1,
+                    color: Color(0xFFF0F0F0),
+                  ),
 
                   // Lista de Gráficos
                   if (listaGraficos.isEmpty)
@@ -209,8 +223,11 @@ class _BioInsumoPageState extends State<BioInsumoPage> {
                       child: Padding(
                         padding: EdgeInsets.all(24.0),
                         child: Text(
-                          "Nenhum dado disponível.", 
-                          style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)
+                          "Nenhum dado disponível.",
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic,
+                          ),
                         ),
                       ),
                     )
@@ -239,14 +256,16 @@ class _BioInsumoPageState extends State<BioInsumoPage> {
         Container(
           padding: const EdgeInsets.only(left: 8),
           decoration: const BoxDecoration(
-            border: Border(left: BorderSide(color: Color(0xFF78C655), width: 4)),
+            border: Border(
+              left: BorderSide(color: Color(0xFF78C655), width: 4),
+            ),
           ),
           child: Text(
             "${config.titulo} (Total: ${config.total})",
             style: const TextStyle(
-              fontSize: 14, 
-              fontWeight: FontWeight.w600, 
-              color: Color(0xFF555555)
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF555555),
             ),
           ),
         ),
@@ -255,7 +274,7 @@ class _BioInsumoPageState extends State<BioInsumoPage> {
         // Barras
         ...config.dados.map((d) {
           final double percentage = d.value / config.maxValue;
-          
+
           return Padding(
             padding: const EdgeInsets.only(bottom: 12.0),
             child: Column(
@@ -269,26 +288,44 @@ class _BioInsumoPageState extends State<BioInsumoPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                
+
                 // Barra e Valor
                 Row(
                   children: [
                     Expanded(
-                      flex: 8, 
+                      flex: 8,
                       child: Stack(
                         children: [
                           // Fundo cinza (trilho)
-                          Container(height: 20, color: Colors.grey[100], width: double.infinity),
+                          Container(
+                            height: 20,
+                            color: Colors.grey[100],
+                            width: double.infinity,
+                          ),
                           // Barra colorida proporcional
-                          FractionallySizedBox(
-                            widthFactor: percentage,
-                            child: Container(
-                              height: 20,
-                              decoration: BoxDecoration(
-                                color: config.cor,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
+                          // Barra que cresce da esquerda para a direita (efeito suave)
+                          TweenAnimationBuilder<double>(
+                            tween: Tween<double>(
+                              begin: 0,
+                              end: percentage,
+                            ), // Começa do 0 até o valor real
+                            duration: const Duration(
+                              milliseconds: 1000,
+                            ), // Demora 1 segundo
+                            curve: Curves
+                                .easeOutQuart, // Desacelera suavemente no final
+                            builder: (context, valorAnimado, child) {
+                              return FractionallySizedBox(
+                                widthFactor: valorAnimado,
+                                child: Container(
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: config.cor,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -299,17 +336,20 @@ class _BioInsumoPageState extends State<BioInsumoPage> {
                       width: 40,
                       child: Text(
                         d.value.toString(),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
                         textAlign: TextAlign.end,
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           );
         }).toList(),
-        
+
         const Divider(color: Color(0xFFE0E0E0)),
       ],
     );

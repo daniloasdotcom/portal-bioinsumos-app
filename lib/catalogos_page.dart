@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:portal_bioinsumos_app/bioinsumos_page.dart';
 import 'package:portal_bioinsumos_app/busca_guiada.dart';
 
 class CatalogosPage extends StatelessWidget {
@@ -61,7 +62,14 @@ class CatalogosPage extends StatelessWidget {
               buttonColor: const Color(0xFF15803D),
               icon: Icons.spa,
               iconColor: Colors.green,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const BioestimulantePage(),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 16),
 
